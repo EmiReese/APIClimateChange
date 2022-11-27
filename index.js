@@ -1,15 +1,41 @@
-const PORT = 8080
+const PORT = process.env.PORT || 8080
 const express = require('express')
 const axios = require('axios')
-const cheerio = ('cheerio')
+const cheerio = require('cheerio')
 
 //calling express and saving it as 'app'
 const app = express()
+articles = []
 
 app.get('/', (req, res
 ) => {
     res.json('welcome to my climate change API')
 })
+
+
+app.get('/news', (req, res) => {
+
+    axios.get('https://www.theguardian.com/environment/climate-crisis')
+    .then((res) => {
+        const html = res.data
+        const $ =  cheerio.load(html)
+
+      $('a:contains("climate")', html).each(function(){
+        const title = $(this).text()
+       const url = $(this).attr('href')
+       articles.push({
+        title,
+        url
+       })
+    })
+    res.json(articles)
+    }).catch((err) => 
+            console.log(err)
+    )
+})
+
+
 app.listen(PORT, ()=> {
     console.log(`server running on port ${PORT} `)
 })
+
